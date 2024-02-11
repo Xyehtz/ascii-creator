@@ -8,7 +8,7 @@ fn main() {
 fn resize_img(original_img_path: &str) -> String {
     let img: DynamicImage = image::open(original_img_path).expect("Failed to open");
     let (width, height): (u32, u32) = img.dimensions();
-    let mut img = resize(&img, width / 2, height / 2, Triangle);
+    let img = resize(&img, width / 2, height / 2, Triangle);
 
     let mut new_img_prefix: String = String::from("new_");
     new_img_prefix.push_str(&original_img_path);
@@ -26,8 +26,8 @@ fn resize_img(original_img_path: &str) -> String {
 }
 
 fn img_to_grayscale(img_path: String) {
-    let mut img: DynamicImage = image::open(img_path.clone()).expect("Error opening the image");
-    let mut img: DynamicImage = img.grayscale();
+    let img: DynamicImage = image::open(img_path.clone()).expect("Error opening the image");
+    let img: DynamicImage = img.grayscale();
     let img: &GrayImage = img.as_luma8().unwrap();
     img.save(img_path).unwrap();
 }
