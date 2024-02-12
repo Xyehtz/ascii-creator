@@ -1,7 +1,9 @@
 use std::fs::{File, remove_file};
 use std::io;
 use std::io::{BufWriter, Write};
-use image::{self, DynamicImage, GrayImage, imageops::*, GenericImageView};
+use image::{self, DynamicImage, imageops::*, GenericImageView, GrayAlphaImage};
+use rand::{thread_rng, Rng};
+use rand::distributions::Alphanumeric;
 
 fn main() {
     println!("Welcome to ASCII Creator by Xyehtz");
@@ -11,9 +13,9 @@ fn main() {
     io::stdin()
         .read_line(&mut raw_path)
         .expect("Error obtaining path");
-    let path: &str = raw_path.as_str();
+    let path: &str = raw_path.as_str().trim();
 
-    let result = pixels_to_ascii(img_to_grayscale(resize_img("images/360_F_300473329_08cy1w5rbmzxLgCaOwgHIYEymVAAJTh9.jpg")));
+    let result = pixels_to_ascii(img_to_grayscale(resize_img(path)));
 
     println!("Exited process with: {:?}\n\n", result);
 }
@@ -23,31 +25,27 @@ fn resize_img(original_img_path: &str) -> String {
     let (width, height): (u32, u32) = img.dimensions();
     let img = resize(&img, width / 2, height / 2, Triangle);
 
-    let mut new_img_prefix: String = String::from("new_");
-    new_img_prefix.push_str(&original_img_path);
-    let mut new_path_string: String = String::new();
+    let mut rand_string: String = thread_rng()
+        .sample_iter(&Alphanumeric)
+        .take(10)
+        .map(char::from)
+        .collect();
+    rand_string.push_str(".png");
 
-    for (i, c) in new_img_prefix.chars().enumerate() {
-        if c == '/' {
-            new_path_string = new_img_prefix.replace(&new_img_prefix[4..i + 1], "");
-            break;
-        }
-    }
-
-    img.save(&new_path_string).unwrap();
-    return new_path_string.clone();
+    img.save(&rand_string).unwrap();
+    return rand_string;
 }
 
 fn img_to_grayscale(img_path: String) -> String {
-    let img: DynamicImage = image::open(img_path.clone()).expect("Error opening the image");
+    let img: DynamicImage = image::open(&img_path).expect("Error opening the image");
     let img: DynamicImage = img.grayscale();
-    let img: &GrayImage = img.as_luma8().unwrap();
-    img.save(img_path.clone()).unwrap();
-    return img_path.clone();
+    let img: &GrayAlphaImage = img.as_luma_alpha8().unwrap();
+    img.save(&img_path).unwrap();
+    return img_path;
 }
 
-fn pixels_to_ascii(img_path: String) -> std::io::Result<()> {
-    let binding: String = img_path.replace(&img_path[img_path.len() - 3..img_path.len()], ".txt");
+fn pixels_to_ascii(img_path: String) -> io::Result<()> {
+    let binding: String = img_path.replace(&img_path[img_path.len() - 3..img_path.len()], "txt");
     let file_path: &str = binding.as_str();
 
     let ascii_chars: [char; 9] = ['@', '#', '8', '&', 'o', ':', '*', '.', ' '];
