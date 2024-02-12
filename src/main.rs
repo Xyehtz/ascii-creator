@@ -1,5 +1,5 @@
 use std::fs::{File, remove_file};
-use std::io;
+use std::{env, io};
 use std::io::{BufWriter, Write};
 use image::{self, DynamicImage, imageops::*, GenericImageView, GrayAlphaImage};
 use rand::{thread_rng, Rng};
@@ -17,13 +17,40 @@ fn main() {
 
     let result = pixels_to_ascii(img_to_grayscale(resize_img(path)));
 
-    println!("Exited process with: {:?}\n\n", result);
+    let current_dir = env::current_dir();
+    let current_dir: String = current_dir.unwrap().display().to_string();
+
+    println!("Exited process with: {:?}\n\n", result.0);
+    println!("Output file: {}\\{}\n\n", current_dir, result.1);
+
+    io::stdin()
+        .read_line(&mut raw_path)
+        .expect("Error closing app");
 }
 
 fn resize_img(original_img_path: &str) -> String {
+    println!("Please choose one of the following options for the quality of the image:\n1. Very high\n2. High\n3. Medium\n4. Low\n5. Very low");
+    let mut option_str: String = String::new();
+    io::stdin()
+        .read_line(&mut option_str)
+        .expect("Error obtaining option");
+    let option: u32 = option_str.trim().parse().expect("Error parsing option");
+
+    let option: u32 = match option {
+        1 => 1,
+        2 => 2,
+        3 => 4,
+        4 => 8,
+        5 => 16,
+        _ => {
+            0;
+            panic!("Please choose a valid number");
+        }
+    };
+
     let img: DynamicImage = image::open(original_img_path).expect("Failed to open");
     let (width, height): (u32, u32) = img.dimensions();
-    let img = resize(&img, width / 2, height / 2, Triangle);
+    let img = resize(&img, width / option, height / option, Triangle);
 
     let mut rand_string: String = thread_rng()
         .sample_iter(&Alphanumeric)
@@ -44,11 +71,11 @@ fn img_to_grayscale(img_path: String) -> String {
     return img_path;
 }
 
-fn pixels_to_ascii(img_path: String) -> io::Result<()> {
+fn pixels_to_ascii(img_path: String) -> (io::Result<()>, String) {
     let binding: String = img_path.replace(&img_path[img_path.len() - 3..img_path.len()], "txt");
     let file_path: &str = binding.as_str();
 
-    let ascii_chars: [char; 9] = ['@', '#', '8', '&', 'o', ':', '*', '.', ' '];
+    let ascii_chars: [char; 39] = ['#', '@', '%', '&', '*', '$', '.', ',', ':', ';', '-', '_', '/', '|', '(', ')', '[', ']', '{', '}', '<', '>', '^', '~', '=', '+', '?', '!', '¬', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
     let img: DynamicImage = image::open(&img_path).expect("Error opening the image");
 
     let file: File = File::create(&file_path).expect("Error creating the file");
@@ -65,8 +92,9 @@ fn pixels_to_ascii(img_path: String) -> io::Result<()> {
         }
         writer.write_all("\n".as_bytes()).expect("Error creating new line")
     }
+
+    writer.flush().expect("Couldn't flush writer");
     remove_file(&img_path).expect("Couldn't remove file");
 
-    writer.flush()?;
-    Ok(())
+    return (Ok(()), file_path.to_string());
 }
