@@ -1,7 +1,7 @@
 use std::fs::{File, remove_file};
 use std::io;
 use std::io::{BufWriter, Write};
-use image::{self, DynamicImage, GrayImage, imageops::*, GenericImageView, GrayAlphaImage};
+use image::{self, DynamicImage, imageops::*, GenericImageView, GrayAlphaImage};
 use rand::{thread_rng, Rng};
 use rand::distributions::Alphanumeric;
 
