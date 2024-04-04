@@ -1,4 +1,4 @@
-name: Rust
+name: "Compile and test Rust app"
 
 on:
   push:
