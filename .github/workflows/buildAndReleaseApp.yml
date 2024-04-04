@@ -26,6 +26,7 @@ jobs:
       - name: Compress file
         run: |
           zip /home/runner/work/ascii-creator/ascii-creator/compressedFile.zip /home/runner/work/ascii-creator/ascii-creator/releaseDir/release/ascii-creator.exe
+        shell: bash
 
       - name: Create GitHub release
         id: create-new-release
