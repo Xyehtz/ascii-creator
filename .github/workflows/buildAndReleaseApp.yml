@@ -1,0 +1,48 @@
+name: "Create Rust app and release"
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  Compile_and_release:
+    permissions:
+      contents: write
+
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build release version
+        run: cargo build --release --target-dir ./releaseDir
+      - name: Run tests
+        run: cargo test --verbose
+      - name: Compress file
+        run: Compress-Archive -Path ./releaseDir/release/ascii-creator.exe -DestinationPath ./asciiCreator.zip
+        shell: pwsh
+
+      - name: Create GitHub release
+        id: create-new-release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.run_number }}
+          name: Release ${{ github.run_number }}
+          files: ./CHANGELOG.md
+
+      - name: Upload release asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-new-release.outputs.upload_url }}
+          asset_path: ./asciiCreator.zip
+          asset_name: ASCII-Creator@v.${{ github.run_number }}.exe
+          asset_content_type: application/zip
