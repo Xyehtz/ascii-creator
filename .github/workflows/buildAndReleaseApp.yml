@@ -35,7 +35,7 @@ jobs:
         with:
           tag_name: ${{ github.run_number }}
           name: Release ${{ github.run_number }}
-          files: CHANGELOG.md
+          body_path: CHANGELOG.md
 
       - name: Upload release asset
         uses: actions/upload-release-asset@v1
