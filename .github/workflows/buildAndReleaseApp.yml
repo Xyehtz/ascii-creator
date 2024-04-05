@@ -35,7 +35,7 @@ jobs:
         with:
           tag_name: ${{ github.run_number }}
           name: Release ${{ github.run_number }}
-          files: ./CHANGELOG.md
+          files: CHANGELOG.md
 
       - name: Upload release asset
         uses: actions/upload-release-asset@v1
@@ -44,5 +44,5 @@ jobs:
         with:
           upload_url: ${{ steps.create-new-release.outputs.upload_url }}
           asset_path: ./asciiCreator.zip
-          asset_name: ASCII-Creator@v.${{ github.run_number }}.exe
+          asset_name: ASCII-Creator@v.${{ github.run_number }}.zip
           asset_content_type: application/zip
